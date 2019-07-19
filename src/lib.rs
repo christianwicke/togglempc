@@ -13,6 +13,3 @@ pub mod mpd_conn_tests;
 mod toggle_mpc_tests;
 #[cfg(test)]
 mod config_tests;
-
-#[cfg(test)] 
-pub use mpd_conn_tests::*;

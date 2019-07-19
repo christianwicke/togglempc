@@ -42,7 +42,9 @@ fn find_toogle_mpc<'a> (toggle_mpcs: &'a HashMap<String, Mutex<ToggleMpc>>, mpd:
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
-        eprintln!("Usage: toggle_mpc <config-file>");
+        eprintln!("Usage:");
+        eprintln!("toggle_mpc <config-file>");
+        eprintln!("config-file must be a valid TOML configuration file. See xxx for example");
         process::exit(1);
     }
     let content = fs::read_to_string(args.get(1).unwrap()).unwrap();

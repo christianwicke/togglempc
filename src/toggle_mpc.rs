@@ -31,28 +31,22 @@ impl ToggleMpc {
     }
     pub fn toggle_play<MC: MpdConn>(&mut self, connection: &mut MC) -> io::Result<()> {
         let response = connection.call("status\n")?;
-        println!("Response for status: {}", response);
         let command = if response.contains("state: play") {
             "pause\n"
         } else {
             "play\n"
         };
-        let response = connection.call(command)?;
-        println!("Response for {}: {}", &command[0..(command.len() - 1)], response);
-
+        connection.call(command)?;
         Ok(())
     }
 
     pub fn switch_list<MC: MpdConn>(&mut self, connection: &mut MC) -> io::Result<()> {
         self.store_position(connection)?;
         self.switch_playlist();
-        let response = connection.call("clear\n")?;
-        println!("Response for clear: {}", response);
+        connection.call("clear\n")?;
         let playlist_name = &self.get_playlist_name();
-        let response = connection.call(&format!("load {}\n", playlist_name))?;
-        println!("Response for load {}: {}", playlist_name, response);
-        let response = connection.call("play\n")?;
-        println!("Response for play: {}", response);
+        connection.call(&format!("load {}\n", playlist_name))?;
+        connection.call("play\n")?;
         self.restore_position(connection)?;
         self.store_playlist_id(connection)?;
         Ok(())
@@ -60,16 +54,11 @@ impl ToggleMpc {
 
     fn store_position<MC: MpdConn>(&mut self, connection: &mut MC) -> io::Result<()> {
         let response = connection.call("status\n")?;
-        println!("Response for status (for position): {}", response);
         let mpd_playlist = extract_playlist(&response);
-        println!("playlists: {:?}, {:?}", self.curent_playlist_id, mpd_playlist);
         let new_position =  if self.playlist_equals_to(mpd_playlist) {
-            println!("Trying to store pos");
             let song_id = extract_song_id(&response);
             let elapsed = extract_elapsed(&response);
-            println!("song, pos: {:?}, {:?}", song_id, elapsed);
             if song_id.is_some() && elapsed.is_some() {
-                println!("Stored Pos {} {}", song_id.unwrap(), elapsed.unwrap());
                 Some(Pos{ song: song_id.unwrap(), elapsed: elapsed.unwrap()})
             } else {
                 None
@@ -84,15 +73,13 @@ impl ToggleMpc {
     fn restore_position<MC: MpdConn>(&mut self, connection: &mut MC) -> io::Result<()> {
         let playlist = self.get_current_playlist();
         if let Some(pos) = playlist.position.take() {
-            let response = connection.call(&format!("seek {} {}\n", pos.song, pos.elapsed))?;
-            println!("Response for seek {} {}: {}", pos.song, pos.elapsed, response);
+            connection.call(&format!("seek {} {}\n", pos.song, pos.elapsed))?;
         }
         Ok(())
     }
 
     fn store_playlist_id<MC: MpdConn>(&mut self, connection: &mut MC) -> io::Result<()> {
         let response = connection.call("status\n")?;
-        println!("Response for status: {}", response);
         self.curent_playlist_id = extract_playlist(&response);
         Ok(())
     }
@@ -138,7 +125,6 @@ fn extract_song_id(state_response: &str) -> Option<u32> {
 
 fn extract_number(state_response: &str, key: &str) -> Option<u32> {
     if let Some(id) = extract_value(state_response, key) {
-        println!("Tring to parse {}", id);
         match id.parse::<u32>() {
             Ok(x) => Some(x),
             Err(_) => None,

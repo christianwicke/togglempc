@@ -20,7 +20,7 @@ impl MpdConnection {
             stream,
             reader,
         };
-        println!("MPD version: {}", &mpd_c.read_line()?);
+        &mpd_c.read_line()?; // read MPD version
 
         Ok(mpd_c)
     }
