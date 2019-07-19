@@ -51,7 +51,7 @@ fn test_switch() {
             .manage(parsed_conf);
 
         let client = Client::new(rocket).unwrap();
-        let mut response = client.post("mpd/living-room/switch-playlist").dispatch();
+        let mut response = client.post("/mpd/living-room/switch-playlist").dispatch();
         assert_eq!(response.body_string(), None);
     }
     handle.join().unwrap();
