@@ -1,4 +1,4 @@
-use rocket::{self, routes, local::Client};
+use rocket::{self, routes, local::Client, http::Status};
 use std::thread;
 use super::*;
 
@@ -53,6 +53,43 @@ fn test_switch() {
         let client = Client::new(rocket).unwrap();
         let mut response = client.post("/mpd/living-room/switch-playlist").dispatch();
         assert_eq!(response.body_string(), None);
+    }
+    handle.join().unwrap();
+}
+
+#[test]
+fn test_invalid_mpd() {
+
+    let config = build_config(&"127.0.0.1:6699");
+    let parsed_conf = parse_config(&config);
+    let rocket = rocket::ignite()
+        .mount("/", routes![toggle_play, switch_playlist])
+        .manage(parsed_conf);
+
+    let client = Client::new(rocket).unwrap();
+    let response = client.post("/mpd/wrong/toggle-play").dispatch();
+    assert_eq!(response.status(), Status::NotFound);
+}
+
+#[test]
+fn test_mpd_error() {
+    let mut mpd_mock = MpdMock::new_v6();
+    let addr_and_port = mpd_mock.addr_and_port.clone();
+    let config = build_config(&addr_and_port);
+
+    let handle = thread::spawn(move || {
+        mpd_mock.start_tcp_server();
+        mpd_mock.process_call("status\n", "playlist: 123\nstate: play\nACK something went wrong\n");
+    });
+    {
+        let parsed_conf = parse_config(&config);
+        let rocket = rocket::ignite()
+            .mount("/", routes![toggle_play, switch_playlist])
+            .manage(parsed_conf);
+
+        let client = Client::new(rocket).unwrap();
+        let response = client.post("/mpd/living-room/toggle-play").dispatch();
+        assert_eq!(response.status(), Status::InternalServerError);
     }
     handle.join().unwrap();
 }
