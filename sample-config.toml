@@ -1,0 +1,25 @@
+[[playlist_collections]]
+id = "default"
+playlists = [ "smoothjazz", "deutschlandfunk", "hr1" ]
+
+[[playlist_collections]]
+id = "otherCollection"
+playlists = [ "smoothjazz", "deutschlandfunk", "hr3" ]
+
+[[mpds]]
+name = "arbeitszimmer"
+address = "v2"
+port = 6605
+playlist_collection_id = "default"
+
+[[mpds]]
+name = "badeg"
+address = "127.0.0.1"
+port = 6605
+playlist_collection_id = "default"
+
+[[mpds]]
+name = "badeg"
+address = "::1"
+port = 6602
+playlist_collection_id = "otherCollection"
