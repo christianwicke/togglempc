@@ -3,6 +3,11 @@ name = "togglempc"
 version = "0.1.0"
 authors = ["Christian Wicke"]
 edition = "2018"
+description = """
+togglempc is a small server that accepts HTTP post requests and acts as a client to MPD (Music Play Daemon, see https://www.musicpd.org/). 
+It can toggle MPD on and off and switch playlist. Home automation or smart switches can use it to control MPD instances.
+"""
+license = "MIT OR Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
