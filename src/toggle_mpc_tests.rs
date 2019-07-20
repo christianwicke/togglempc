@@ -1,6 +1,6 @@
 use std::collections::{VecDeque};
 use std::io;
-use crate::{MpdConn, ToggleMpcWithConn, ToggleMpc};
+use crate::{MpdConn, ToggleMpc};
 
 struct MpdConnMock<'a> {
     responses : VecDeque<(&'a str, &'a str)>,
@@ -31,20 +31,18 @@ impl <'a> MpdConnMock<'a> {
 
 #[test]
 fn test_toggle_from_pause_to_play() {
-    let mut mock = MpdConnMock::new(vec![("status\n", "volume: 67\nstate: pause\nOK\n"), ("play\n", "OK\n")]);
-    let mut state = ToggleMpc::new("".to_string(), vec!("deutschlandfunk"));
-    let mut tm = ToggleMpcWithConn::new(&mut mock, &mut state);
-    tm.toggle_play().unwrap();
-    assert!(mock.communcation_perfomed());
+    let mut conn_mock = MpdConnMock::new(vec![("status\n", "volume: 67\nstate: pause\nOK\n"), ("play\n", "OK\n")]);
+    let mut toggle_mpc = ToggleMpc::new("".to_string(), vec!("deutschlandfunk"));
+    toggle_mpc.toggle_play(&mut conn_mock).unwrap();
+    assert!(conn_mock.communcation_perfomed());
 }
 
 #[test]
 fn test_toggle_from_play_to_pause() {
-    let mut mock = MpdConnMock::new(vec![("status\n", "volume: 67\nstate: play\nOK\n"), ("pause\n", "OK\n")]);
-    let mut state = ToggleMpc::new("".to_string(), vec!("deutschlandfunk"));
-    let mut tm = ToggleMpcWithConn::new(&mut mock, &mut state);
-    tm.toggle_play().unwrap();
-    assert!(mock.communcation_perfomed());
+    let mut conn_mock = MpdConnMock::new(vec![("status\n", "volume: 67\nstate: play\nOK\n"), ("pause\n", "OK\n")]);
+    let mut toggle_mpc = ToggleMpc::new("".to_string(), vec!("deutschlandfunk"));
+    toggle_mpc.toggle_play(&mut conn_mock).unwrap();
+    assert!(conn_mock.communcation_perfomed());
 }
 
 #[test]
@@ -55,11 +53,10 @@ fn test_switch_list() {
     ("load hr3\n", "OK\n"),
     ("play\n", "OK\n"),
     ("status\n", "playlist: 124\nstate: play\nOK\n")];
-    let mut mock = MpdConnMock::new(responses);
-    let mut state = ToggleMpc::new("".to_string(), vec!("hr1", "hr3"));
-    let mut tm = ToggleMpcWithConn::new(&mut mock, &mut state);
-    tm.switch_list().unwrap();
-    assert!(mock.communcation_perfomed());
+    let mut conn_mock = MpdConnMock::new(responses);
+    let mut toggle_mpc = ToggleMpc::new("".to_string(), vec!("hr1", "hr3"));
+    toggle_mpc.switch_list(&mut conn_mock).unwrap();
+    assert!(conn_mock.communcation_perfomed());
 }
 
 #[test]
@@ -81,11 +78,10 @@ fn test_switch_list_keeps_pos() {
         ("play\n", "OK\n"),
         ("seek 24 84\n", "OK\n"),
         ("status\n", "playlist: 126\nstate: play\nOK\n")];
-    let mut mock = MpdConnMock::new(responses);
-    let mut state = ToggleMpc::new("".to_string(), vec!("Dire Straits - Brothers In Arms", "Badesalz - Diwodaso"));
-    let mut tm = ToggleMpcWithConn::new(&mut mock, &mut state);
-    tm.switch_list().unwrap();
-    tm.switch_list().unwrap();
-    tm.switch_list().unwrap();
-    assert!(mock.communcation_perfomed());
+    let mut conn_mock = MpdConnMock::new(responses);
+    let mut toggle_mpc = ToggleMpc::new("".to_string(), vec!("Dire Straits - Brothers In Arms", "Badesalz - Diwodaso"));
+    toggle_mpc.switch_list(&mut conn_mock).unwrap();
+    toggle_mpc.switch_list(&mut conn_mock).unwrap();
+    toggle_mpc.switch_list(&mut conn_mock).unwrap();
+    assert!(conn_mock.communcation_perfomed());
 }

@@ -4,8 +4,8 @@ mod toggle_mpc;
 mod config;
 pub use mpd_conn::MpdConn;
 pub use mpd_conn::MpdConnection;
-pub use toggle_mpc::{ToggleMpcWithConn, ToggleMpc};
-pub use config::parse_config;
+pub use toggle_mpc::ToggleMpc;
+pub use config::{ToggleMpcConfig, parse_config};
 
 #[cfg(test)]
 pub mod mpd_conn_tests;

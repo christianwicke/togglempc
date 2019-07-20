@@ -2,10 +2,20 @@
 use std::io::{self, prelude::*};
 use std::net::TcpStream;
 
+/// Trait to perform communication with the MPD server.
 pub trait MpdConn {
+    /// Performs a call to MPD.
+    /// The `request` command must be terminated with a newline.
+    /// The returned string is the raw MPD response. Lines are separated with `\n` and include the final `OK\b` line.
+    /// # Errors
+    /// 
+    /// If a TCP problem occurs, the causing `io::Error` is returned. It will be printed to stderr.
+    /// 
+    /// If MPD replies with an `ACK` instead of `OK`, a `io::Error` is created. The MPD error message will also be printed to stderr.
     fn call(&mut self, request: &str) -> io::Result<String>;
 }
 
+/// Implementation for `MpdConn` with a real `TcpStream`.
 pub struct MpdConnection {
     stream: TcpStream,
     reader: io::BufReader<TcpStream>,

@@ -1,11 +1,7 @@
 use std::io;
 use crate::mpd_conn::MpdConn;
 
-pub struct ToggleMpcWithConn<'a, MC: MpdConn> {
-    mpd_c: &'a mut MC,
-    toggle_mpc: &'a mut ToggleMpc,
-}
-
+/// The MPD Client. It allows to toggle play and to switch playlist.
 pub struct ToggleMpc {
     pub address_and_port: String,
     playlists: Vec<PlaylistWithState>,
@@ -29,6 +25,11 @@ impl ToggleMpc {
         let playlists = playlists.iter().map(|pl| PlaylistWithState{ name: pl.to_string(), position: None}).collect();
         Self { address_and_port, playlists, curent_playlist: 0, curent_playlist_id: None }
     }
+    /// Toggles play: If MPD is in state play, it will be paused. Otherwise it will command MPD to play.
+    /// 
+    /// # Errors
+    /// 
+    /// Errors may occur using the connection to MPD. They are propagated.
     pub fn toggle_play<MC: MpdConn>(&mut self, connection: &mut MC) -> io::Result<()> {
         let response = connection.call("status\n")?;
         let command = if response.contains("state: play") {
@@ -40,6 +41,14 @@ impl ToggleMpc {
         Ok(())
     }
 
+    /// Switches playlist: Clears the current playlist, loads the next configures playlist and plays it.
+    /// After the last playlist the first is played again.
+    /// Before switching, the position within the playlist ist stored. 
+    /// When returning to this playlist, a seek is performed to continue from the last position.
+    /// 
+    /// # Errors
+    /// 
+    /// Errors may occur using the connection to MPD. They are propagated.
     pub fn switch_list<MC: MpdConn>(&mut self, connection: &mut MC) -> io::Result<()> {
         self.store_position(connection)?;
         self.switch_playlist();
@@ -98,20 +107,6 @@ impl ToggleMpc {
     }
     fn set_position(&mut self, new_position: Option<Pos>) {
         self.get_current_playlist().position = new_position;
-    }
-}
-
-impl<'a, MC: MpdConn> ToggleMpcWithConn<'a, MC> {
-    pub fn new(mpd_c: &'a mut MC, toggle_mpc: &'a mut ToggleMpc) -> ToggleMpcWithConn<'a, MC> {
-        ToggleMpcWithConn { mpd_c, toggle_mpc }
-    }
-
-    pub fn toggle_play(&mut self) -> io::Result<()> {
-        self.toggle_mpc.toggle_play(self.mpd_c)
-    }
-
-    pub fn switch_list(&mut self) -> io::Result<()> {
-        self.toggle_mpc.switch_list(self.mpd_c)
     }
 }
 

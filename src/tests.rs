@@ -18,7 +18,7 @@ fn test_toggle() {
         mpd_mock.process_call("pause\n", "OK\n");
     });
     {
-        let parsed_conf = parse_config(&config);
+        let parsed_conf = parse_config_and_build_toggle_mpcs(&config);
         let rocket = rocket::ignite()
             .mount("/", routes![toggle_play, switch_playlist])
             .manage(parsed_conf);
@@ -45,7 +45,7 @@ fn test_switch() {
         mpd_mock.process_call("status\n", "playlist: 124\nstate: play\nOK\n");
     });
     {
-        let parsed_conf = parse_config(&config);
+        let parsed_conf = parse_config_and_build_toggle_mpcs(&config);
         let rocket = rocket::ignite()
             .mount("/", routes![toggle_play, switch_playlist])
             .manage(parsed_conf);
@@ -61,7 +61,7 @@ fn test_switch() {
 fn test_invalid_mpd() {
 
     let config = build_config(&"127.0.0.1:6699");
-    let parsed_conf = parse_config(&config);
+    let parsed_conf = parse_config_and_build_toggle_mpcs(&config);
     let rocket = rocket::ignite()
         .mount("/", routes![toggle_play, switch_playlist])
         .manage(parsed_conf);
@@ -82,7 +82,7 @@ fn test_mpd_error() {
         mpd_mock.process_call("status\n", "playlist: 123\nstate: play\nACK something went wrong\n");
     });
     {
-        let parsed_conf = parse_config(&config);
+        let parsed_conf = parse_config_and_build_toggle_mpcs(&config);
         let rocket = rocket::ignite()
             .mount("/", routes![toggle_play, switch_playlist])
             .manage(parsed_conf);

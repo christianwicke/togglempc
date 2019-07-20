@@ -7,19 +7,19 @@ id = "otherCollection"
 playlists = [ "smoothjazz", "deutschlandfunk", "hr3" ]
 
 [[mpds]]
-name = "arbeitszimmer"
-address = "v2"
+name = "living-room"
+address = "myserver"
 port = 6605
 playlist_collection_id = "default"
 
 [[mpds]]
-name = "badeg"
+name = "bath-upstairs"
 address = "127.0.0.1"
-port = 6605
+port = 6601
 playlist_collection_id = "default"
 
 [[mpds]]
-name = "badeg"
+name = "bath-downstairs"
 address = "::1"
 port = 6602
 playlist_collection_id = "otherCollection"

@@ -13,18 +13,16 @@ use togglempc::*;
 fn toggle_play(toggle_mpcs: State<HashMap<String, Mutex<ToggleMpc>>>, mpd: String) -> Result<(), Status> {
     let mut toggle_mpc = find_toogle_mpc(&toggle_mpcs, &mpd)?.lock().unwrap();
     let mut mpd_c = MpdConnection::new(&toggle_mpc.address_and_port).map_err(map_io_err)?;
-    let mut tmwc = ToggleMpcWithConn::new(&mut mpd_c, &mut toggle_mpc);
 
-    tmwc.toggle_play().map_err(map_io_err)
+    toggle_mpc.toggle_play(&mut mpd_c).map_err(map_io_err)
 }
 
 #[post("/mpd/<mpd>/switch-playlist")]
 fn switch_playlist(toggle_mpcs: State<HashMap<String, Mutex<ToggleMpc>>>, mpd: String) -> Result<(), Status> {
     let mut toggle_mpc = find_toogle_mpc(&toggle_mpcs, &mpd)?.lock().unwrap();
     let mut mpd_c = MpdConnection::new(&toggle_mpc.address_and_port).map_err(map_io_err)?;
-    let mut tmwc = ToggleMpcWithConn::new(&mut mpd_c, &mut toggle_mpc);
 
-    tmwc.switch_list().map_err(map_io_err)
+    toggle_mpc.switch_list(&mut mpd_c).map_err(map_io_err)
 }
 
 fn map_io_err(e: io::Error) -> Status { 
@@ -48,9 +46,29 @@ fn main() {
         process::exit(1);
     }
     let content = fs::read_to_string(args.get(1).unwrap()).unwrap();
-    let parsed_conf = parse_config(&content);
+    let toggle_mpcs = parse_config_and_build_toggle_mpcs(&content);
     rocket::ignite()
         .mount("/", routes![toggle_play, switch_playlist])
-        .manage(parsed_conf)
+        .manage(toggle_mpcs)
         .launch();
 }
+
+fn parse_config_and_build_toggle_mpcs(config: &str) -> HashMap<String, Mutex<ToggleMpc>> {
+    build_toggle_mpcs(parse_config(config))
+}
+
+fn build_toggle_mpcs(toggle_mpc_configs: Vec<ToggleMpcConfig>) -> HashMap<String, Mutex<ToggleMpc>> {
+    toggle_mpc_configs.into_iter()
+        .map(|c| build_toggle_mpc_entry(c))
+        .map(|(name, toggle_mpc)| (name, Mutex::new(toggle_mpc)))
+        .collect()
+}
+
+fn build_toggle_mpc_entry(toggle_mpc_config: ToggleMpcConfig) -> (String, ToggleMpc) {
+    (toggle_mpc_config.name, ToggleMpc::new (toggle_mpc_config.address_and_port, convert_vec_string_to_vec_str(&toggle_mpc_config.playlists)))
+}
+
+fn convert_vec_string_to_vec_str(vec_string: &Vec<String>) -> Vec<&str> {
+    vec_string.iter().map(|s| s.as_str()).collect()
+}
+
