@@ -1,15 +1,24 @@
+# You need to define at least one playlist collection.
+# A playlist collection consists of an id and the playlists to be played.
 [[playlist_collections]]
+# The id under which this playlist collection is referenced in the [[mpd]] entries.
 id = "default"
+# playlist of the MPD that should be used when playlist is switched.
 playlists = [ "smoothjazz", "deutschlandfunk", "hr1" ]
 
 [[playlist_collections]]
 id = "otherCollection"
 playlists = [ "smoothjazz", "deutschlandfunk", "hr3" ]
 
+# Here are the MPDs that you want to control.
 [[mpds]]
+# The name is what you enter in the post URL http://my-server:8000/mpd/<name>/toggle-play
 name = "living-room"
+# The address of the MPD can be a DNS name or an IP-address
 address = "myserver"
-port = 6605
+# The port your MPD ist listening to. Normally it is 6600
+port = 6600
+# The reference to the playlist_collection that should be used for this daemon.
 playlist_collection_id = "default"
 
 [[mpds]]
