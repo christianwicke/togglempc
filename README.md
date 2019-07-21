@@ -17,14 +17,14 @@ If you use openHAB, here is an example for two openhab rules to control MPD (it 
 ```
 rule "toggle play kitchen"
 when
-    Item Kitchen_music_on_off changed
+    Item Kitchen_music_on_off received command
 then
     sendHttpPostRequest("http://192.168.1.25:8000/mpd/kitchen/toggle-play")
 end
 
 rule "switch playlist kitchen"
 when
-    Item Kitchen_music_channel changed
+    Item Kitchen_music_channel received command
 then
     sendHttpPostRequest("http://192.168.1.25:8000/mpd/kitchen/switch-playlist")
 end
