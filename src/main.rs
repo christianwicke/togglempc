@@ -9,6 +9,11 @@ use togglempc::*;
 #[cfg(test)] mod tests;
 
 
+#[get("/")]
+fn eintry_page() ->  &'static str {
+    "<!DOCTYPE html>\n<html><head><title>ToggleMpc</title></head><body><h1>ToggleMpc</h1><p>up and running</p></body></html>"
+}
+
 #[post("/mpd/<mpd>/toggle-play")]
 fn toggle_play(toggle_mpcs: State<HashMap<String, Mutex<ToggleMpc>>>, mpd: String) -> Result<(), Status> {
     let mut toggle_mpc = find_toogle_mpc(&toggle_mpcs, &mpd)?.lock().unwrap();
