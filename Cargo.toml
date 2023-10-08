@@ -2,7 +2,7 @@
 name = "togglempc"
 version = "0.1.1"
 authors = ["Christian Wicke <github@c.fg9.eu>"]
-edition = "2023"
+edition = "2021"
 description = """
 Togglempc is a small REST server that accepts HTTP post requests to toggle MPD on and off and switch playlist. (It is a client to MPD.) MPD is Music Play Daemon, see https://www.musicpd.org/.
 Togglempc can be used for home automation or smart switches can use it to control MPD instances.
