@@ -1,6 +1,6 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
-use rocket::{post, routes, State, http::Status};
+use rocket::{get, post, routes, State, http::Status};
 use std::{io, env, fs, process};
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -15,7 +15,7 @@ fn eintry_page() ->  &'static str {
 }
 
 #[post("/mpd/<mpd>/toggle-play")]
-fn toggle_play(toggle_mpcs: State<HashMap<String, Mutex<ToggleMpc>>>, mpd: String) -> Result<(), Status> {
+fn toggle_play(toggle_mpcs: &State<HashMap<String, Mutex<ToggleMpc>>>, mpd: String) -> Result<(), Status> {
     let mut toggle_mpc = find_toogle_mpc(&toggle_mpcs, &mpd)?.lock().unwrap();
     let mut mpd_c = MpdConnection::new(&toggle_mpc.address_and_port).map_err(map_io_err)?;
 
@@ -23,7 +23,7 @@ fn toggle_play(toggle_mpcs: State<HashMap<String, Mutex<ToggleMpc>>>, mpd: Strin
 }
 
 #[post("/mpd/<mpd>/switch-playlist")]
-fn switch_playlist(toggle_mpcs: State<HashMap<String, Mutex<ToggleMpc>>>, mpd: String) -> Result<(), Status> {
+fn switch_playlist(toggle_mpcs: &State<HashMap<String, Mutex<ToggleMpc>>>, mpd: String) -> Result<(), Status> {
     let mut toggle_mpc = find_toogle_mpc(&toggle_mpcs, &mpd)?.lock().unwrap();
     let mut mpd_c = MpdConnection::new(&toggle_mpc.address_and_port).map_err(map_io_err)?;
 
@@ -32,13 +32,13 @@ fn switch_playlist(toggle_mpcs: State<HashMap<String, Mutex<ToggleMpc>>>, mpd: S
 
 fn map_io_err(e: io::Error) -> Status { 
     eprintln!("Error while proccessing request: {}", e);
-    Status::new(500, "Error while processing request") 
+    Status::new(500) 
 }
 
 fn find_toogle_mpc<'a> (toggle_mpcs: &'a HashMap<String, Mutex<ToggleMpc>>, mpd: &str) -> Result<&'a Mutex<ToggleMpc>, Status> {
     match toggle_mpcs.get(mpd) {
         Some(x) => Ok(&x),
-        None => Err(Status::new(404, "No MPD configured for that name")),
+        None => Err(Status::new(404)),
     }
 }
 
@@ -52,7 +52,7 @@ fn main() {
     }
     let content = fs::read_to_string(args.get(1).unwrap()).unwrap();
     let toggle_mpcs = parse_config_and_build_toggle_mpcs(&content);
-    rocket::ignite()
+    rocket::build()
         .mount("/", routes![toggle_play, switch_playlist])
         .manage(toggle_mpcs)
         .launch();
