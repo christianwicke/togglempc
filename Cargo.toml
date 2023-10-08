@@ -13,5 +13,5 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 rocket = "0.4.11"
-toml = "1.66.0"
+toml = "0.8.2"
 serde = { version = "1.0.188", features = ["derive"] }
