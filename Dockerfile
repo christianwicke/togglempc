@@ -4,7 +4,6 @@ FROM debian:bullseye as build-togglempc
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential git curl ca-certificates && apt-get clean
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 RUN git clone https://github.com/christianwicke/togglempc.git
-RUN cd togglempc/ && /root/.cargo/bin/rustup override set nightly
 RUN cd togglempc/ && /root/.cargo/bin/cargo build --release
 
 FROM debian:bullseye

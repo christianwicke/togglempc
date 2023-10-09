@@ -30,7 +30,7 @@ impl MpdConnection {
             stream,
             reader,
         };
-        &mpd_c.read_line()?; // read MPD version
+        let _ = &mpd_c.read_line()?; // read MPD version
 
         Ok(mpd_c)
     }

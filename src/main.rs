@@ -1,6 +1,4 @@
-#![feature(proc_macro_hygiene, decl_macro)]
-
-use rocket::{get, post, routes, State, http::Status};
+use rocket::{launch, get, post, routes, State, http::Status};
 use std::{io, env, fs, process};
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -42,7 +40,8 @@ fn find_toogle_mpc<'a> (toggle_mpcs: &'a HashMap<String, Mutex<ToggleMpc>>, mpd:
     }
 }
 
-fn main() {
+#[launch]
+fn rocket() -> _ {
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
         eprintln!("Usage:");
@@ -53,9 +52,8 @@ fn main() {
     let content = fs::read_to_string(args.get(1).unwrap()).unwrap();
     let toggle_mpcs = parse_config_and_build_toggle_mpcs(&content);
     rocket::build()
-        .mount("/", routes![toggle_play, switch_playlist])
+        .mount("/", routes![toggle_play, switch_playlist, eintry_page])
         .manage(toggle_mpcs)
-        .launch();
 }
 
 fn parse_config_and_build_toggle_mpcs(config: &str) -> HashMap<String, Mutex<ToggleMpc>> {
