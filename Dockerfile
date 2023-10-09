@@ -9,5 +9,6 @@ RUN cd togglempc/ && /root/.cargo/bin/cargo build --release
 FROM debian:bullseye
 COPY --from=build-togglempc /togglempc/target/release/togglempc .
 COPY --from=build-togglempc /togglempc/sample-config.toml .
+ENV ROCKET_address=0.0.0.0
 ENTRYPOINT ["/togglempc"]
 CMD ["sample-config.toml"]
